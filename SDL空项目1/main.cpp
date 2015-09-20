@@ -19,6 +19,10 @@ double Newton(int n,double *x,double *y,double xx);
 double DiffQuotient(double *x,double *y,int xstart,int xx);
 double DiffQuoTable[13][13];
 bool DiffQuoExist[13][13];
+double Hermite_n(double xx);
+double Hermite(int n,double *x,double *y,double *m,double xx);
+double TheLeastSquareMethod_n(double xx);
+double TheLeastSquareMethod(int m,double *x,double *y,double xx);
 void Menu();
 int DrawFx(double (*Fx)(double),double *x,double *y,int n);
 
@@ -26,6 +30,7 @@ int DrawFx(double (*Fx)(double),double *x,double *y,int n)
 {
     //Start SDL
     SDL_Init(SDL_INIT_EVERYTHING);
+	TTF_Init();
 	//获取屏幕分辨率
 	int Screen_Wid;
 	int Screen_Hgt;
@@ -40,6 +45,8 @@ int DrawFx(double (*Fx)(double),double *x,double *y,int n)
 
 	Main_Renderer = SDL_CreateRenderer(Main_Windows, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
+	TTF_Font *MainFont = TTF_OpenFont("./cour.ttf", 18);
+
 	SDL_Event event;
 	int While_Quit = -1;
 	
@@ -47,6 +54,7 @@ int DrawFx(double (*Fx)(double),double *x,double *y,int n)
 	int Y_pos = Windows_Height / 2;
 	int Mouse_Old_X;
 	int Mouse_Old_Y;
+	double PixRate = 1.0;
 	int MoveState = false;
 	while (While_Quit == -1)
 	{
@@ -61,22 +69,38 @@ int DrawFx(double (*Fx)(double),double *x,double *y,int n)
 		//画L(n)
 		int xx;
 		for (xx = 0;xx < Windows_Width;xx ++){
-			int x1,y1;
-			x1 = xx - X_pos;
+			double x1,y1;
+			x1 = ((double)(xx - X_pos)) / PixRate;
 			y1 = Fx(x1);
 			int yy;
-			yy = Y_pos - y1;
+			yy = Y_pos - y1 * PixRate;
 			SDL_RenderDrawPoint(Main_Renderer,xx,yy);
 		}
 		//画fx
 		SDL_SetRenderDrawColor(Main_Renderer,255,0,0,255);
 		for (int i = 0;i < n;i ++){
 			int xx;
-			xx = X_pos + x[i];
+			xx = X_pos + x[i] * PixRate;
 			int yy;
-			yy = Y_pos - y[i];
+			yy = Y_pos - y[i] * PixRate;
+			SDL_Rect TempRect;
+			TempRect.x = xx-3;
+			TempRect.y = yy-3;
+			TempRect.w = 5;
+			TempRect.h = 5;
+			SDL_RenderFillRect(Main_Renderer,&TempRect);
 			SDL_RenderDrawPoint(Main_Renderer,xx,yy);
 		}
+		//绘制调试信息
+		char str[100] = {0};
+		sprintf(str,"%d",X_pos);
+		SDL_ShowTTFtoRenderer(MainFont,Main_Renderer,str,20, 20,0,255,0);
+		sprintf(str,"%d",Y_pos);
+		SDL_ShowTTFtoRenderer(MainFont,Main_Renderer,str,20, 40,0,255,0);
+		sprintf(str,"%lf",PixRate);
+		SDL_ShowTTFtoRenderer(MainFont,Main_Renderer,str,20, 60,0,255,0);
+		//复位按钮
+		SDL_ShowTTFtoRenderer(MainFont,Main_Renderer,"Reset",20, 80,0,255,0);
 		SDL_RenderPresent(Main_Renderer);
 
 		while(SDL_PollEvent(&event))
@@ -96,12 +120,32 @@ int DrawFx(double (*Fx)(double),double *x,double *y,int n)
 				}
 			}
 			else if (event.type == SDL_MOUSEBUTTONDOWN){
-				MoveState = true;
-				Mouse_Old_X = event.motion.x;
-				Mouse_Old_Y = event.motion.y;
+				if (event.button.button == SDL_BUTTON_LEFT){
+					if (event.motion.x >= 20 && event.button.x <= 65 && event.button.y >= 80 && event.button.y <= 100){
+						X_pos = Windows_Width / 2;
+						Y_pos = Windows_Height / 2;
+						PixRate = 1.0;
+					}
+					else{
+						MoveState = true;
+						Mouse_Old_X = event.motion.x;
+						Mouse_Old_Y = event.motion.y;
+					}
+				}
 			}
 			else if (event.type == SDL_MOUSEBUTTONUP){
-				MoveState = false;
+				if (event.button.button == SDL_BUTTON_LEFT){
+					MoveState = false;
+				}
+			}
+			else if (event.type == SDL_MOUSEWHEEL){
+				if (event.wheel.y > 0){
+					//放大
+					PixRate *= 2;
+				}
+				else if (event.wheel.y < 0){
+					PixRate /= 2;
+				}
 			}
          }
     }
@@ -111,7 +155,8 @@ int DrawFx(double (*Fx)(double),double *x,double *y,int n)
 	SDL_DestroyWindow(Main_Windows);
     //Quit SDL
     SDL_Quit();
-
+	//关闭TTF
+	TTF_Quit();
     return 0;
 
 }
@@ -124,6 +169,8 @@ int main(int args,char **argc){
 		cout << "选择函数" << endl;
 		cout << "1.Lagrange(65)" << endl;
 		cout << "2.Newton(65)" << endl;
+		cout << "3.Hermite(0.55)" << endl;
+		cout << "4.TheLeastSquareMethod(55)" << endl;
 		cout << "0:退出" << endl;
 		cin >> MenuIndex;
 		if (MenuIndex == 1){
@@ -140,11 +187,77 @@ int main(int args,char **argc){
 			cout << "Newton_n(65):" << Newton_n(65) << endl;
 			DrawFx(Newton_n,x,y,13);
 		}
+		else if (MenuIndex == 3){
+			double x[] = {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0};
+			double y[] = {0.904837,0.818731,0.740818,0.670320,0.606531,
+				0.548812,0.496585,0.449329,0.406570,0.367879};system("cls");
+			cout << "Hermite_n(0.55):" << Hermite_n(0.55) << endl;
+			DrawFx(Hermite_n,x,y,10);
+		}
+		else if (MenuIndex == 4){
+			double x[] = {0,10,20,30,40,50,60,70,80,90};
+			double y[] = {68,67.1,66.4,65.6,64.6,61.8,61.0,60.8,60.4,60};
+			cout << "TheLeastSquareMethod(55):" << TheLeastSquareMethod_n(55) << endl;
+			DrawFx(TheLeastSquareMethod_n,x,y,10);
+		}
 		else if (MenuIndex == 0){
 			While_Quit = true;
 		}
 	}
 	return 0;
+}
+
+double TheLeastSquareMethod_n(double xx){
+	double x[] = {0,10,20,30,40,50,60,70,80,90};
+	double y[] = {68,67.1,66.4,65.6,64.6,61.8,61.0,60.8,60.4,60};
+	return TheLeastSquareMethod(10,x,y,xx);
+}
+
+double TheLeastSquareMethod(int m,double *x,double *y,double xx){
+	double sxi2 = 0;
+	double syi = 0;
+	double sxi = 0;
+	double sxiyi = 0;
+	for (int i = 0;i < m;i ++){
+		sxi2 += x[i] * x[i];
+		syi += y[i];
+		sxi += x[i];
+		sxiyi += x[i] * y[i];
+	}
+	double a = (sxi2 * syi - sxi * sxiyi) / ((m + 1) * sxi2 - sxi * sxi);
+	double b = ((m + 1) * sxiyi - sxi * syi) / ((m + 1) * sxi2 - sxi * sxi);
+	return a * xx + b;
+}
+
+double Hermite_n(double xx){
+	double x[] = {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0};
+	double y[] = {0.904837,0.818731,0.740818,0.670320,0.606531,
+				0.548812,0.496585,0.449329,0.406570,0.367879};
+	double m[] = {-0.904837,-0.818731,-0.740818,-0.670320,-0.606531,
+				-0.548812,-0.496585,-0.449329,-0.406570,-0.367879};
+	return Hermite(10,x,y,m,xx);
+}
+
+double Hermite(int n,double *x,double *y,double *m,double xx){
+	double Result = 0;
+	for (int j = 0;j < n;j ++){
+		double lj = 1;
+		for (int i = 0;i < n;i ++){
+			if (i == j) continue;
+			lj *= (xx - x[i]) / (x[j] - x[i]);
+		}
+		double ljs = 0;
+		for (int k = 0;k < n;k ++){
+			if (k == j) continue;
+			ljs += (double)1.0 / (x[j] - x[k]);
+		}
+		double aj;
+		aj = (1 - 2 * (xx - x[j]) * ljs) * lj * lj;
+		double bj;
+		bj = (xx - x[j]) * lj * lj;
+		Result += y[j] * aj + m[j] * bj;
+	}
+	return Result;
 }
 
 double Lagrange_n(double xx){
