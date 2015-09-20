@@ -1,0 +1,17 @@
+﻿生成启动时间为 2015/9/20 9:29:53。
+     1>项目“E:\MyVSWorkSpace\Lagrange\SDL空项目1\SDL空项目1.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _USING_V110_SDK71_ /D _MBCS /Gm /EHsc /RTC1 /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
+         main.cpp
+     1>e:\myvsworkspace\lagrange\sdl空项目1\main.cpp(66): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+     1>e:\myvsworkspace\lagrange\sdl空项目1\main.cpp(75): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+     1>e:\myvsworkspace\lagrange\sdl空项目1\main.cpp(77): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+       Link:
+         D:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\MyVSWorkSpace\Lagrange\Debug\Lagrange.exe" /INCREMENTAL /NOLOGO SDL2.lib SDL2main.lib SDL2_image.lib SDL2_mixer.lib SDL2_ttf.lib SDL2test.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\MyVSWorkSpace\Lagrange\Debug\Lagrange.pdb" /SUBSYSTEM:CONSOLE,"5.01" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\MyVSWorkSpace\Lagrange\Debug\Lagrange.lib" /MACHINE:X86 Debug\main.obj
+         Debug\SDLSimpleLibary.obj
+         SDL空项目1.vcxproj -> E:\MyVSWorkSpace\Lagrange\Debug\Lagrange.exe
+     1>已完成生成项目“E:\MyVSWorkSpace\Lagrange\SDL空项目1\SDL空项目1.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:01.53
